@@ -2,7 +2,7 @@ import numpy
 from timeit import default_timer as timer
 
 # Range and size of random array
-RANGE = (0, 10000)
+RANGE = (0, 100000)
 SIZE = 3000
 
 random_array = numpy.random.randint(*RANGE, SIZE)
@@ -12,7 +12,10 @@ def sort_wrapper(sorting_method: staticmethod, array: numpy.ndarray):
     array_copy = numpy.copy(array)
     start_time = timer()
 
-    sorted_array = sorting_method(array_copy)
+    if sorting_method is quicksort:
+        sorted_array = sorting_method(array_copy, 0, len(array_copy)-1)
+    else:
+        sorted_array = sorting_method(array_copy)
 
     time_elapsed = timer() - start_time
     return sorted_array, time_elapsed
@@ -33,3 +36,36 @@ def selection_sort(array: numpy.ndarray):
         array[i], array[min_index] = array[min_index], array[i]
 
     return array
+
+
+def quicksort(array: numpy.ndarray, lo, hi):
+    if lo < hi:
+        pp = partition(array, lo, hi)
+        quicksort(array, lo, pp-1)
+        quicksort(array, pp + 1, hi)
+
+    return array
+       
+       
+def partition(array: numpy.ndarray, lo, hi):
+    pivot = array[lo]
+    i = lo + 1
+    j = hi
+    while i < j:
+        while i <= j and array[i] <= pivot:
+            i += 1
+        while i <= j and array[j] >= pivot:
+            j -= 1
+
+        if i > j:
+            break
+        else:
+            array[i], array[j] = array[j], array[i]
+
+    array[lo], array[j] = array[j], array[lo]
+
+    return j
+        
+
+for algorithm in [bubble_sort, selection_sort, quicksort]:
+    print('Algorithm: {:.<30} time: {}'.format(algorithm.__name__, sort_wrapper(algorithm, random_array)[1]))
